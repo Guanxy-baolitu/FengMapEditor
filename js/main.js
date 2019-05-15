@@ -1,125 +1,64 @@
-var map;
-var polylineListener, pointListener
-var indoorMapObj = {};
-indoorMapObj.borderlines = [];//在腾讯地图无法表示的一个场馆内，多个borderline可表示不同的楼层
-indoorMapObj.regions = [];
-indoorMapObj.keydots = [];
-
-function FeatureObj(mtype)
-{
-  this.type ="Feature";
-  this.geometry = {};
-  this.geometry.type = mtype;
-  this.geometry.coordinates =[];
-  this.properties ={};
-}
-var penPointMarker;
-
 var init = function() {
-  map = new qq.maps.Map(document.getElementById("container"),{
-    center: new qq.maps.LatLng(39.7592,116.356666),
-
-    draggableCursor: "crosshair",
-    zoom: 18
-  });
-  penPointMarker = new qq.maps.Circle({
-    map: map,
-    radius: 2,
-    fillColor: "#00f",
-    strokeWeight: 2,
-    zIndex:3
-  });
-  window.switchToPointMode = function() {
-    var newPoint = new qq.maps.Circle({
-      map: map,
-      radius: 2,
-      fillColor: "#f86553",
-      strokeWeight: 5,
-      zIndex:2
-    });
-    pointListener = qq.maps.event.addListener(map, 'click', function(event) {
-      newPoint.setCenter(event.latLng);
-      var geoPoint = [];
-      geoPoint.push(event.latLng.getLng());
-      geoPoint.push(event.latLng.getLat());
-      indoorMapObj.keydots.push(geoPoint);
-      qq.maps.event.removeListener(pointListener);
+  initQQMap();
+  window.switchToPointMode = switchToPointModeFunction;
+  window.switchToRectMode = function () {
+    switchToDrawMode();
+    map.setOptions({draggable: false});
+    var newRect = new Rectangle(currentColor);
+    GeojsonPages[currentPageName].floors[currentFloor].MapCovers.push(newRect);
+    addRectMouseDownListener = qq.maps.event.addListener(map, 'mousedown', function (event) {
+      addRectMouseDownFunction(event, newRect);
     });
   };
-  window.switchToBoderPolyLineMode = function() {
-    var borderLine = [];
-    var polyline = new qq.maps.Polyline({
-      path: borderLine,
-      strokeColor: '#f86553',
-      strokeWeight: 2,
-      editable:false,
-      map: map
+  window.switchToPolygonMode = function () {
+    switchToDrawMode();
+    var newPolygon = new Polygon(currentColor);
+    GeojsonPages[currentPageName].floors[currentFloor].MapCovers.push(newPolygon);
+    addPolygonListener = qq.maps.event.addListener(map, 'click', function (event) {
+      addPolygonNewPosFunction(event, newPolygon);
     });
-    polylineListener = qq.maps.event.addListener(map, 'click', function(event) {
-      penPointMarker.setVisible(true);
-      penPointMarker.setCenter(event.latLng);
-      borderLine.push(event.latLng);
-      polyline.setPath(borderLine);
-    });
-    var enterToMakePolygon = function(e)
-    {
-      // 兼容FF和IE和Opera
-      var event = e || window.event;
-      var key = event.which || event.keyCode || event.charCode;
-      if (key == 13) {
-        borderLine.push(borderLine[0]);
-        indoorMapObj.borderlines.push(borderLine);
-        polyline.setPath([]);
-        penPointMarker.setVisible(false);
-        var polygon = new qq.maps.Polygon({
-          path:borderLine,
-          map: map
-        });
-        qq.maps.event.addListener(polygon, 'click', function(event)
-        {
-          polygon.fillcolor = '#5f9ea0';
-          d3.select()
-          {
-
-          }
-        })
-        qq.maps.event.removeListener(polylineListener);
-        document.removeEventListener("keydown", enterToMakePolygon);
-      }
-    }
-    document.addEventListener("keydown", enterToMakePolygon);
   };
-  window.saveAllToGeoJSON = function()
+  window.selectMultiMarkers = selectMultiMarkersFunction;
+  window.deleteCurrentMarkers = function ()
   {
-    var geoStorageObj = {};
-    geoStorageObj.type = "FeatureCollection";
-    geoStorageObj.features = [];
-    if(indoorMapObj.keydots.length!==0)
-    {
-      var multiPointFeature = new FeatureObj("MultiPoint");
-      multiPointFeature.geometry.coordinates = indoorMapObj.keydots;
-      geoStorageObj.features.push(multiPointFeature);
-    }
-    if (indoorMapObj.borderlines.length !== 0)
-    {
-      for(var borderLineIdx in indoorMapObj.borderlines)
-      {
-        var lineStringFeature = new FeatureObj("Polygon");
-        var borderLine =  indoorMapObj.borderlines[borderLineIdx];
-        for (var qqPntIdx in borderLine)
-        {
-          var geoPoint = [];
-          geoPoint.push(borderLine[qqPntIdx].getLng());
-          geoPoint.push(borderLine[qqPntIdx].getLat());
-          lineStringFeature.geometry.coordinates.push(geoPoint);
-        }
-        geoStorageObj.features.push(lineStringFeature);
-      }
-    }
-    var new_json = JSON.stringify(geoStorageObj);
-    alert(new_json);
+    exitSelectMode();
+    if(currentMarkerList==false) return;
+    currentMarkerList.forEach(function(delMarker) {delMarker.qqMarker.setMap(null);});
   };
-
+  window.addNewFloor = AddNewFloorFunction;
+  window.addDetailPage = AddDetailPageFunction;
+  window.selectFloorOnChange = function(floor){
+    ReFreshTheQQMap(currentPageName, floor.value);
+  };
+  window.selectPageOnChange = function(page){
+    ReFreshTheQQMap(page.value, 1);
+  };
+  window.assignGPStoActivity = function ()
+  {
+    exitSelectMode();
+    var GPSs = [];
+    if(currentMarkerList==false) return;
+    currentMarkerList.forEach(function(gpsObj) {
+      var gps;
+      if(gpsObj instanceof KeyPoint)
+        gps = gpsObj.qqMarker.center;
+      else if(gpsObj instanceof Rectangle)
+        gps=new qq.maps.LatLng((gpsObj.points[0].getLat()+gpsObj.points[2].getLat())*0.5,
+          (gpsObj.points[0].getLng()+gpsObj.points[2].getLng())*0.5);
+      else if(gpsObj instanceof Polygon)
+      {
+        var lat = 0.0, lng = 0.0;
+        gpsObj.points.forEach(function(pnt){
+          lat+=pnt.getLat();
+          lng+=pnt.getLng();
+        });
+        gps = new qq.maps.LatLng(lat/gpsObj.points.length, lng/gpsObj.points.length);
+      }
+      GPSs.push(gps);
+    });
+    alert(GPSs.toString());
+  };
+  window.saveAllToGeoJSON = saveAllToGeoJSONFunction;
 }
 
 

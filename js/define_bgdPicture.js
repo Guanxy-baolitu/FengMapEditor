@@ -18,8 +18,8 @@ function addGroundOverlay(fileId) {
     map: map,
     imageUrl: url,
     //设置覆盖层的透明度
-    opacity: 0.7,
-    clickable: false,
+    opacity: 0.4,
+    clickable: true,
   });
   var flag =0;
   overlayBoundListener = qq.maps.event.addListener(map, 'click', function(event) {

@@ -98,8 +98,12 @@ p{
   min-height:767px;
 }
 .toolButton{
-  width: 30pt;
-  height:30pt;
+  width: 20pt;
+  height:20pt;
+}
+.selectButton{
+  width: 50pt;
+  height:20pt;
 }
 
 /*
