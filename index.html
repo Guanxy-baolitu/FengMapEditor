@@ -20,7 +20,7 @@
 
 <!-- **********这里********** -->
 
-<body onload="init()">
+<body onload="init()" style="width: 100%;">
   <!--[if IE]>
     <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience and security.</p>
   <![endif]-->
@@ -28,7 +28,7 @@
   <!-- Add your site or application content here -->
 
   <!--**********这里********** -->
-  <div class="row" style="width: 100%; padding: 8px;">
+  <div class="row" style="width: 98%; padding-top: 8px; padding-left: 8px;">
     <div class="col-md-4">
       <form class="form-inline" role="form">
         <input type='text' class="form-control" size="2" value='北京' id="regionText" />
@@ -82,9 +82,28 @@
         onclick="saveAllToGeoJSON()" type="button" /></div>
   </div>
   <!---第二行--->
-  <div class="row" style="padding: 8px;">
+  <div class="row" style="padding-bottom: 8px;">
     <div class="col-md-4"><span></span></div>
-    <div id="paintCollapse" class="col-md-4 collapse" style="padding: 8px;">
+    <div id="paintCollapse" class="col-md-4 collapse form-inline">
+        <label>选择图标</label>
+        <img id="currentIcon" src="img/icons/icon0.png" data-toggle="collapse" data-target="#iconPanelCollapse"
+          class="colorboard btn btn-xs" />
+        <div id="iconPanelCollapse" class="collapse">
+            <img id="option0" src="img/icons/icon0.png" type="image" onclick="switchIcon('0')" data-toggle="collapse"
+              data-target="#iconPanelCollapse" class="btn btn-xs toolButton" />
+          <img id="option1" src="img/icons/icon1.png" type="image" onclick="switchIcon('1')" data-toggle="collapse"
+            data-target="#iconPanelCollapse" class="btn btn-xs toolButton" />
+          <img id="option2" src="img/icons/icon2.png" type="image" onclick="switchIcon('2')" data-toggle="collapse"
+            data-target="#iconPanelCollapse" class="btn btn-xs toolButton" />
+          <img id="option3" src="img/icons/icon3.png" type="image" onclick="switchIcon('3')" data-toggle="collapse"
+            data-target="#iconPanelCollapse" class="btn btn-xs toolButton" />
+          <img id="option4" src="img/icons/icon4.png" type="image" onclick="switchIcon('4')" data-toggle="collapse"
+            data-target="#iconPanelCollapse" class="btn btn-xs toolButton" />
+          <img id="option5" src="img/icons/icon5.png" type="image" onclick="switchIcon('5')" data-toggle="collapse"
+            data-target="#iconPanelCollapse" class="btn btn-xs toolButton" />
+          <img id="option6" src="img/icons/icon6.png" type="image" onclick="switchIcon('6')" data-toggle="collapse"
+            data-target="#iconPanelCollapse" class="btn btn-xs toolButton" />
+        </div>
       <label>选择颜色</label>
       <img id="currentColor" src="img/colors/color1.jpg" data-toggle="collapse" data-target="#colorPanelCollapse"
         class="colorboard btn btn-xs" />
@@ -103,11 +122,24 @@
           data-target="#colorPanelCollapse" class="btn btn-xs toolButton" />
       </div>
     </div>
-    <div id="selectCollapse" class="col-md-4 collapse" style="padding: 8px;">
+    <div id="selectCollapse" class="col-md-4 collapse">
       <div id="SelectThenDo" class="form-inline">
-        <input id="assignGPSBtn" value="关联活动" onclick="assignCurrentMarkers()" class=" btn btn-primary" type="button" />
-        <input id="AddDetailPageBtn" value="添加详情页" data-toggle="modal" data-target="#myModal2" class=" btn btn-primary"type="button" />
-        <input id="DeleteBtn" value="删除" onclick="deleteCurrentMarkers()" class=" btn btn-danger" type="button" />
+        <input id="assignActBtn" value="关联活动"data-toggle="modal" onclick="updateActivityOptions()" data-target="#activityModal" class=" btn btn-primary disabled" type="button" />
+        <div class="modal fade" id="activityModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+          aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-body">
+                <select name="现有活动" class="form-control" id="actSelect"></select>
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal"
+                  onclick="assignCurrentMarkers()">关联活动</button>
+              </div>
+            </div><!-- /.modal-content -->
+          </div><!-- /.modal -->
+        </div>
+        <input id="AddDetailPageBtn" value="添加详情页" data-toggle="modal" data-target="#myModal2" class=" btn btn-primary disabled"type="button" />
+        <input id="DeleteBtn" value="删除" onclick="deleteCurrentMarkers()" class=" btn btn-danger disabled" type="button" />
       </div>
     </div>
     <div class="col-md-3"><span></span></div>

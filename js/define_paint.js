@@ -2,7 +2,7 @@
  * Created by 关某人 on 2019/5/12.
  */
 var currentColor = new qq.maps.Color(255, 127, 80, 0.3);
-var currentIcon = new qq.maps.MarkerImage("img/penPoint.png");
+var currentIcon = new qq.maps.MarkerImage("img/icons/icon0t.png");
 var constShadow = new qq.maps.MarkerImage("img/shadow.png");
 
 var drawingManager;
@@ -20,21 +20,20 @@ var initDrawManager = function () {
         qq.maps.drawing.OverlayType.POLYLINE,
         qq.maps.drawing.OverlayType.RECTANGLE
       ]
-    },
-    markerOptions:{
-      map: map,
-      draggable: true,
-      icon: currentIcon,
-      //设置Marker标题，鼠标划过Marker时显示
-      title: '测试'
     }
   });
+  refreshMarkerOptions();
   refreshDrawOptions();
   qq.maps.event.addListener(drawingManager, 'overlaycomplete', function(cover) {addCoverToMapObj(cover.overlay);});
 }
 var addCoverToMapObj = function (cover) {
   var newCover = new mapCoverObj(cover);
   GeojsonPages[currentPageName].floors[currentFloor].MapCovers.push(newCover);
+}
+var refreshMarkerOptions = function()
+{
+  drawingManager.setOptions({
+    markerOptions:{map: map,draggable: true,icon: currentIcon,title: '测试'}});
 }
 var refreshDrawOptions = function()
 {
@@ -89,6 +88,20 @@ var switchToPaintModeFunction = function () {
   refreshMapCoverOptions(false, true);
   addEventListener("keydown", enterToExitPaintMode);
 };
+var switchIconFunction = function (icon) {
+  switch (icon) {
+    case '0': currentIcon = new qq.maps.MarkerImage("img/icons/icon0t.png"); break;
+    case '1': currentIcon = new qq.maps.MarkerImage("img/icons/icon1.png"); break;
+    case '2': currentIcon = new qq.maps.MarkerImage("img/icons/icon2.png"); break;
+    case '3': currentIcon = new qq.maps.MarkerImage("img/icons/icon3.png"); break;
+    case '4': currentIcon = new qq.maps.MarkerImage("img/icons/icon4.png"); break;
+    case '5': currentIcon = new qq.maps.MarkerImage("img/icons/icon5.png"); break;
+    case '6': currentIcon = new qq.maps.MarkerImage("img/icons/icon6.png"); break;
+    default: break;
+  }
+  refreshMarkerOptions();
+  $("#currentIcon").attr("src", "img/icons/icon" + icon + ".png");
+}
 
 var switchColorFunction = function (color) {
   switch (color) {

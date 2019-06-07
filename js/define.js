@@ -64,10 +64,10 @@ var AddNewFloorFunction = function()
 };
 
 var AddDetailPageFunction = function () {
-  exitPaintMode();
-  exitSelectMode();
+  if (currentMarkerList == false) return;
   var pageName = document.getElementById('pageInput').value;
   if(pageName=="")return;
+  exitSelectMode();
   var exist = false;
   Object.keys(GeojsonPages).forEach(function(name){if(name==pageName) exist = false;})
   if(exist == true) return;

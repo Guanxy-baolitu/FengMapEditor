@@ -4,10 +4,9 @@
 var deleteClickListener;
 var currentMarkerList = [];
 
-var enterToExitSelectMode = function(e)
-{
+var enterToExitSelectMode = function (e) {
   var event = e || window.event; var key = event.which || event.keyCode || event.charCode;// 兼容FF和IE和Opera
-  if (key == 13||key==27) {
+  if (key == 13 || key == 27) {
     exitSelectMode();
     document.removeEventListener("keydown", enterToExitSelectMode);
   }
@@ -16,8 +15,23 @@ var exitSelectMode = function () {
   $("#SelectBtn").removeClass("btn-warning");
   $("#SelectBtn").addClass("btn-primary");
   $("#selectCollapse").removeClass("in");
+  setSelectButtonsEnabled(false);
   refreshMapCoverOptions(false, false);
 };
+
+var setSelectButtonsEnabled = function(enable){
+  if(enable==true)
+  {
+    $("#AddDetailPageBtn").removeClass("disabled");
+    $("#DeleteBtn").removeClass("disabled");
+    $("#assignActBtn").removeClass("disabled");
+  }
+  else{
+    $("#AddDetailPageBtn").addClass("disabled");
+    $("#DeleteBtn").addClass("disabledg");
+    $("#assignActBtn").addClass("disabled");
+  }
+}
 
 var switchToSelectModeFunction = function () {
   exitPaintMode();
@@ -26,56 +40,57 @@ var switchToSelectModeFunction = function () {
   $("#selectCollapse").collapse("show");
   currentMarkerList.length = 0;
   addEventListener("keydown", enterToExitSelectMode);
-  if(GeojsonPages[currentPageName].floors[currentFloor].MapCovers==false) return;
-  GeojsonPages[currentPageName].floors[currentFloor].MapCovers.forEach(function(mapCover)
-  {
-    mapCover.qqCover.clickable=true;
-    mapCover.qqCover.editable=false;
+  if (GeojsonPages[currentPageName].floors[currentFloor].MapCovers == false) return;
+  GeojsonPages[currentPageName].floors[currentFloor].MapCovers.forEach(function (mapCover) {
+    mapCover.qqCover.clickable = true;
+    mapCover.qqCover.editable = false;
     mapCover.qqCover.cursor = "hand";
-    var pushToList = function (currentMarkerList) { 
-      currentMarkerList.push(mapCover); 
+    var pushToList = function (currentMarkerList) {
+      currentMarkerList.push(mapCover);
       mapCover.qqCover.clickable = false;
-      if(mapCover.qqCover instanceof qq.maps.Marker) {mapCover.qqCover.setShadow(constShadow);}
-      else {mapCover.qqCover.setStrokeColor("#1e90ff");}
-      mapCover.qqCover.cursor = "default"; 
-      qq.maps.event.removeListener(mapCover.clickListener); 
+      if (mapCover.qqCover instanceof qq.maps.Marker) { mapCover.qqCover.setShadow(constShadow); }
+      else { mapCover.qqCover.setStrokeColor("#1e90ff"); }
+      mapCover.qqCover.cursor = "default";
+      qq.maps.event.removeListener(mapCover.clickListener);
     };
-    mapCover.clickListener = qq.maps.event.addListener(mapCover.qqCover, 'click', function(event){pushToList(currentMarkerList);});
+    mapCover.clickListener = qq.maps.event.addListener(mapCover.qqCover, 'click', function (event) { pushToList(currentMarkerList); 
+      setSelectButtonsEnabled(true); });
     mapCover.qqCover.strokeColor = mapCover.qqCover.fillColor;
   });
-  ReFreshTheQQMap(currentPageName,currentFloor);
+  ReFreshTheQQMap(currentPageName, currentFloor);
 };
 
-var assignCurrentMarkersFunction = function ()
-{
-  exitSelectMode();
-  var GPSs = [];
-  if(currentMarkerList==false) return;
-  currentMarkerList.forEach(function(gpsObj) {
-    var gps;
-    if(gpsObj instanceof KeyPoint)
-      gps = gpsObj.qqCover.center;
-    else if(gpsObj instanceof Rectangle)
-      gps=new qq.maps.LatLng((gpsObj.points[0].getLat()+gpsObj.points[2].getLat())*0.5,
-        (gpsObj.points[0].getLng()+gpsObj.points[2].getLng())*0.5);
-    else if(gpsObj instanceof Polygon)
-    {
-      var lat = 0.0, lng = 0.0;
-      gpsObj.points.forEach(function(pnt){
-        lat+=pnt.getLat();
-        lng+=pnt.getLng();
-      });
-      gps = new qq.maps.LatLng(lat/gpsObj.points.length, lng/gpsObj.points.length);
-    }
-    GPSs.push(gps);
+var updateActivityOptionsFunction = function () {
+  var actSelectDom = document.getElementById("actSelect");
+  actSelectDom.options.length = 0;
+  ///Mock
+  var activities = [];
+  function act(idx, name) {
+    this.actID = idx;
+    this.actName = name;
+  }
+  activities.push(new act(1, "表演"));
+  activities.push(new act(2, "抽奖"));
+  ///Mock
+  if (activities.length === 0) return;
+  activities.forEach(function (act) {
+    actSelectDom.options.add(new Option(act.actName, act.actID));
   });
-  alert(GPSs.toString());
-};
-var deleteCurrentMarkersFunction = function ()
-{
+  actSelectDom.value = activities[0].actID;
+}
+
+var assignCurrentMarkersFunction = function () {
+  if (currentMarkerList == false) return;
+  var actID = parseInt(document.getElementById('actSelect').value);
   exitSelectMode();
-  if(currentMarkerList==false) return;
-  currentMarkerList.forEach(function(delMarker) {delMarker.qqCover.setMap(null);});
+  currentMarkerList.forEach(function (mapCover) {
+    mapCover.actId=actID;
+  });
+};
+var deleteCurrentMarkersFunction = function () {
+  if (currentMarkerList == false) return;
+  exitSelectMode();
+  currentMarkerList.forEach(function (delMarker) { delMarker.qqCover.setMap(null); });
 };
 
 var selectMultiMarkersWithCallback = function (objList, callback) {

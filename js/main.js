@@ -1,6 +1,7 @@
 var init = function() {
   initQQMap();
   window.switchToPaintMode = switchToPaintModeFunction;
+  window.switchIcon = function(color){ switchIconFunction(color)};
   window.switchColor = function(color){ switchColorFunction(color)};
   window.switchToSelectMode = switchToSelectModeFunction;
   window.deleteCurrentMarkers = deleteCurrentMarkersFunction;
@@ -13,6 +14,7 @@ var init = function() {
   window.selectPageOnChange = function(page){
     ReFreshTheQQMap(page.value, 1);
   };
+  window.updateActivityOptions = updateActivityOptionsFunction;
   window.searchKeyword = searchKeywordFunction;
   window.previewDetailPage = previewDetailPageFunction;
   window.saveAllToGeoJSON = saveAllToGeoJSONFunction;
