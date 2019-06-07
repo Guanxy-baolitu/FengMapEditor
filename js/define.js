@@ -1,7 +1,6 @@
 /**
  * Created by 关某人 on 2019/5/14.
  */
-
 var map;
 function initQQMap()
 {
@@ -11,15 +10,10 @@ function initQQMap()
     mapStyleId :'style2',
     zoom: 18
   });
-  penPointMarker = new qq.maps.Circle({
-    map: map,
-    radius: 2,
-    fillColor: "#00f",
-    strokeWeight: 2,
-    zIndex:3
-  });
   // TODO: 加载
   ReadJsonToGeoPage();
+  initSearchKeyWord();
+  initDrawManager();
 }
 
 var currentPageName = "";
@@ -38,22 +32,23 @@ function Floor(idx)
   this.mapCoverObjID= 0;
   this.MapCovers=[];
 }
-function mapCoverObj(color)
+function mapCoverObj(cover)
 {
-  this.color = color;
   this.id = GeojsonPages[currentPageName].floors[currentFloor].mapCoverObjID++;
-  this.clickListener = null;
-  this.qqMarker = null;
+  this.qqCover = cover;
+  this.actId = null;
+  this.hasPage = false;
 }
 
 var AddNewFloorFunction = function()
 {
   exitPaintMode();
   exitSelectMode();
-  var floorIdx=parseInt(prompt("楼层数：",""));
+  var floorIdx=parseInt(document.getElementById('floorInput').value);
   if(!isNaN(floorIdx))
   {
     var exist = false;
+    if(Object.keys(GeojsonPages[currentPageName].floors).length>=6) {alert("过多楼层将导致难以显示");return;}
     Object.keys(GeojsonPages[currentPageName].floors).forEach(function(idx){ if(idx == floorIdx) exist = true; });
     if(exist == true) return;
     GeojsonPages[currentPageName].floors[floorIdx] = new Floor(floorIdx);
@@ -71,7 +66,7 @@ var AddNewFloorFunction = function()
 var AddDetailPageFunction = function () {
   exitPaintMode();
   exitSelectMode();
-  var pageName = prompt("详情页名称","");
+  var pageName = document.getElementById('pageInput').value;
   if(pageName=="")return;
   var exist = false;
   Object.keys(GeojsonPages).forEach(function(name){if(name==pageName) exist = false;})
@@ -82,18 +77,17 @@ var AddDetailPageFunction = function () {
   {
     currentMarkerList.forEach(function(marker)
     {
-      GeojsonPages[currentPageName].floors[1].MapCovers.push(marker);
+      GeojsonPages[currentPageName].floors[1].MapCovers.hasPage = true;
     });
   }
   ReFreshTheQQMap(pageName, 1);
 };
 
 var ReFreshTheQQMap = function(pageName, floorIdx) {
-  console.log(GeojsonPages);
   var pageSelectDom = document.getElementById("pageSelect");
   pageSelectDom.options.length=0;
-  if(pageName==defaultPageName) map.setOptions({mapStyleId :'style2'});
-  else map.setOptions({mapStyleId :'style1'});
+  if(pageName==defaultPageName){$('#DetailPageAddition').collapse('hide');map.setOptions({mapStyleId :'style2'});}
+  else{$('#DetailPageAddition').collapse('show');map.setOptions({mapStyleId :'style1'});} 
   Object.keys(GeojsonPages).forEach(function(name){
     pageSelectDom.options.add(new Option(name, name));
     if(name==pageName) {
@@ -104,11 +98,11 @@ var ReFreshTheQQMap = function(pageName, floorIdx) {
         currentFloor = floorIdx;
         if (idx == floorIdx) {
           GeojsonPages[name].floors[idx].MapCovers.forEach(function(mapCover){
-            mapCover.qqMarker.setVisible(true);
+            mapCover.qqCover.setVisible(true);
           });
         }else{
           GeojsonPages[name].floors[idx].MapCovers.forEach(function(mapCover){
-            mapCover.qqMarker.setVisible(false);
+            mapCover.qqCover.setVisible(false);
           });
         }});
       floorSelectDom.value =floorIdx.toString();
@@ -116,7 +110,7 @@ var ReFreshTheQQMap = function(pageName, floorIdx) {
     else{
       Object.keys(GeojsonPages[name].floors).forEach(function(idx){
         GeojsonPages[name].floors[idx].MapCovers.forEach(function(mapCover){
-          mapCover.qqMarker.setVisible(false);
+          mapCover.qqCover.setVisible(false);
         });});
     }});
   pageSelectDom.value=pageName;

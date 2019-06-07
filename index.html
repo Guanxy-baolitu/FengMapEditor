@@ -13,11 +13,13 @@
 
   <link rel="stylesheet" href="css/normalize.css">
   <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/bootstrap/css/bootstrap.min.css">
 
   <meta name="theme-color" content="#fafafa">
 </head>
 
 <!-- **********这里********** -->
+
 <body onload="init()">
   <!--[if IE]>
     <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience and security.</p>
@@ -26,40 +28,100 @@
   <!-- Add your site or application content here -->
 
   <!--**********这里********** -->
-  <div id="DrawTool">
-    <div id="DrawTool_Shape">
-      <input id="PointBtn" src="img/dot.png" onclick="switchToPointMode()" class="toolButton" type="image" />
-      <input id="PolygonBtn" src="img/polygon.png" onclick="switchToPolygonMode()" class="toolButton" type="image" />
-      <input id="RectangleBtn" src="img/rect.png" onclick="switchToRectMode()" class="toolButton" type="image" />
+  <div class="row" style="width: 100%; padding: 8px;">
+    <div class="col-md-4">
+      <form class="form-inline" role="form">
+        <input type='text' class="form-control" size="2" value='北京' id="regionText" />
+        <div class="input-group">
+          <input id="keyword" class="form-control" size="14" type="textbox" placeholder="请输入地点关键词">
+          <span class="input-group-btn">
+            <input type="button" class="btn btn-primary" value="搜索" onclick="searchKeyword()">
+          </span>
+        </div>
+      </form>
     </div>
-    <div></div>
-    <div id="DrawTool_Color">
-
+    <div class="col-md-3 btn-group">
+      <input id="PaintBtn" class='btn btn-primary' value="绘制展区模式" onclick="switchToPaintMode()" type="button" />
+      <input id="SelectBtn" class=" btn btn-primary" value="选择模式" onclick="switchToSelectMode()" type="button" />
+    </div>
+    <div class="col-md-4">
+      <div id="SwitchFloorAndDetail" class="form-inline form-group">
+        <select name="当前详情页" class="form-control" id="pageSelect" onchange="selectPageOnChange(this)"></select>
+        <div class="modal fade" id="myModal1" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+          aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-body">
+                <input type="number" class="form-control" id="floorInput" value="" placeholder="楼层" size="2">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal"
+                  onclick="AddNewFloorFunction()">添加楼层</button>
+              </div>
+            </div><!-- /.modal-content -->
+          </div><!-- /.modal -->
+        </div>
+        <select name="当前楼层" class="form-control" id="floorSelect" onchange="selectFloorOnChange(this)"></select>
+        <input id="AddNewFloorBtn" value="添加楼层" data-toggle="modal" data-target="#myModal1" class=" btn btn-primary"
+          type="button" />
+        <div class="modal fade" id="myModal2" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+          aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-body">
+                <input type="text" class="form-control" id="pageInput" value="" placeholder="详情页名称" size="24">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal"
+                  onclick="AddDetailPageFunction()">添加详情页</button>
+              </div>
+            </div><!-- /.modal-content -->
+          </div><!-- /.modal -->
+        </div>
+      </div>
+    </div>
+    <div class="col-md-1"><input id="SaveJsonBtn" class='btn btn-block btn-success' value="保存地图"
+        onclick="saveAllToGeoJSON()" type="button" /></div>
+  </div>
+  <!---第二行--->
+  <div class="row" style="padding: 8px;">
+    <div class="col-md-4"><span></span></div>
+    <div id="paintCollapse" class="col-md-4 collapse" style="padding: 8px;">
+      <label>选择颜色</label>
+      <img id="currentColor" src="img/colors/color1.jpg" data-toggle="collapse" data-target="#colorPanelCollapse"
+        class="colorboard btn btn-xs" />
+      <div id="colorPanelCollapse" class="collapse">
+        <img id="option1" src="img/colors/color1.jpg" type="image" onclick="switchColor('1')" data-toggle="collapse"
+          data-target="#colorPanelCollapse" class="btn btn-xs toolButton" />
+        <img id="option2" src="img/colors/color2.jpg" type="image" onclick="switchColor('2')" data-toggle="collapse"
+          data-target="#colorPanelCollapse" class="btn btn-xs toolButton" />
+        <img id="option3" src="img/colors/color3.jpg" type="image" onclick="switchColor('3')" data-toggle="collapse"
+          data-target="#colorPanelCollapse" class="btn btn-xs toolButton" />
+        <img id="option4" src="img/colors/color4.jpg" type="image" onclick="switchColor('4')" data-toggle="collapse"
+          data-target="#colorPanelCollapse" class="btn btn-xs toolButton" />
+        <img id="option5" src="img/colors/color5.jpg" type="image" onclick="switchColor('5')" data-toggle="collapse"
+          data-target="#colorPanelCollapse" class="btn btn-xs toolButton" />
+        <img id="option6" src="img/colors/color6.jpg" type="image" onclick="switchColor('6')" data-toggle="collapse"
+          data-target="#colorPanelCollapse" class="btn btn-xs toolButton" />
+      </div>
+    </div>
+    <div id="selectCollapse" class="col-md-4 collapse" style="padding: 8px;">
+      <div id="SelectThenDo" class="form-inline">
+        <input id="assignGPSBtn" value="关联活动" onclick="assignCurrentMarkers()" class=" btn btn-primary" type="button" />
+        <input id="AddDetailPageBtn" value="添加详情页" data-toggle="modal" data-target="#myModal2" class=" btn btn-primary"type="button" />
+        <input id="DeleteBtn" value="删除" onclick="deleteCurrentMarkers()" class=" btn btn-danger" type="button" />
+      </div>
+    </div>
+    <div class="col-md-3"><span></span></div>
+    <div id="DetailPageAddition" class="collapse in col-md-2">
+        <input id="PreviewBtn" class='btn btn-block btn-success' value="预览详情页"
+            onclick="previewDetailPage()" type="button" />
     </div>
   </div>
-  <div id="SelectThenDo">
-    <input id="SelectBtn" value="选择" onclick="selectMultiMarkers()" class="selectButton" type="button"/>
-    <input id="assignGPSBtn" value="设置为地点" onclick="assignGPStoActivity()" class="selectButton" type="button"/>
-    <input id="DeleteBtn" value="删除" onclick="deleteCurrentMarkers()" class="selectButton" type="button"/>
-    <input id="AddNewFloorBtn" value="添加楼层" onclick="AddNewFloorFunction()" class="selectButton" type="button"/>
-    <input id="AddDetailPageBtn" value="添加详情页" onclick="AddDetailPageFunction()" class="selectButton" type="button"/>
-  </div>
-  <div id="SwitchFloorAndDetail">
-    <select name="当前楼层" id="floorSelect"  onchange="selectFloorOnChange(this)"></select>
-    <select name="当前楼层" id="pageSelect"  onchange="selectPageOnChange(this)"></select>
-  </div>
-  <div id="DetailPageAddition">
-    <label for="file" class='btn btn-success'>上传底图</label>
-    <input type="file" name="file" id="file" accept="image/jpg" onchange="addGroundOverlay(this.id)"/>
-    <input id="PreviewH5Btn" value="预览详情页" onclick="selectMultiMarkers()" class="selectButton" type="button"/>
-  </div>
-  <div>
-    <input id="SaveJsonBtn" src="img/saveAsJson.png" onclick="saveAllToGeoJSON()" class="toolButton" type="image" />
-  </div>
-
   <div id="container"></div>
+  <div style='position:absolute; top:110px; left:60px; background:aliceblue' id="infoDiv">
+    <button id="hideInfoDiv" type="button" class="btn btn-block btn-default">关闭</button></div>
   <script src="js/vendor/modernizr-3.7.1.min.js"></script>
-  <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js"
+    integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
   <script>window.jQuery || document.write('<script src="js/vendor/jquery-3.3.1.min.js"><\/script>')</script>
   <script src="js/plugins.js"></script>
   <script src="js/main.js"></script>
@@ -67,19 +129,20 @@
   <!-- Google Analytics: change UA-XXXXX-Y to be your site's ID. -->
   <script>
     window.ga = function () { ga.q.push(arguments) }; ga.q = []; ga.l = +new Date;
-    ga('create', 'UA-XXXXX-Y', 'auto'); ga('set','transport','beacon'); ga('send', 'pageview')
+    ga('create', 'UA-XXXXX-Y', 'auto'); ga('set', 'transport', 'beacon'); ga('send', 'pageview')
   </script>
   <!--<script src="https://www.google-analytics.com/analytics.js" async defer></script>-->
-  <script charset="utf-8" src="https://map.qq.com/api/js?v=2.exp&key=NTOBZ-P5VKX-HNE4Y-7YCTP-WP3UZ-VLFTQ&libraries=drawing,geometry,place,convertor,visualization"></script>
-
+  <script charset="utf-8"
+    src="https://map.qq.com/api/js?v=2.exp&key=NTOBZ-P5VKX-HNE4Y-7YCTP-WP3UZ-VLFTQ&libraries=drawing,geometry,place,convertor,visualization"></script>
+  <script src="css/bootstrap/js/bootstrap.min.js"></script>
   <!--**********这里********** -->
   <script src="js/main.js"></script>
   <script src="js/define.js"></script>
   <script src="js/define_paint.js"></script>
-  <script src="js/define_paintFunction.js"></script>
   <script src="js/define_select.js"></script>
   <script src="js/define_save.js"></script>
   <script src="js/define_bgdPicture.js"></script>
+  <script src="js/searchKeyWord.js"></script>
 
 </body>
 
