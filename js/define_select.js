@@ -22,7 +22,8 @@ var exitSelectMode = function () {
 var setSelectButtonsEnabled = function(enable){
   if(enable==true)
   {
-    $("#AddDetailPageBtn").removeClass("disabled");
+    if(currentPageName==defaultPageName)
+      $("#AddDetailPageBtn").removeClass("disabled");
     $("#DeleteBtn").removeClass("disabled");
     $("#assignActBtn").removeClass("disabled");
   }
