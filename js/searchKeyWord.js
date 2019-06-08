@@ -46,7 +46,10 @@ var initSearchKeyWord = function () {
 //设置搜索的范围和关键字等属性
 var searchKeywordFunction = function () {
     // 根据输入的城市设置搜索范围
-    searchService.setLocation(document.getElementById("regionText").value);
+    if(document.getElementById("regionText").value!="")
+        searchService.setLocation(document.getElementById("regionText").value);
+    else
+        searchService.setLocation("北京");
     //根据输入的关键字在搜索范围内检索
     searchService.search(document.getElementById("keyword").value);
     $(document).on('click', '#infoDiv ol li',

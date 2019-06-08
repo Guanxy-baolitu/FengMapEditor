@@ -9,9 +9,13 @@ var init = function() {
   window.addNewFloor = AddNewFloorFunction;
   window.addDetailPage = AddDetailPageFunction;
   window.selectFloorOnChange = function(floor){
+    exitPaintMode();
+    exitSelectMode();
     ReFreshTheQQMap(currentPageName, floor.value);
   };
   window.selectPageOnChange = function(page){
+    exitPaintMode();
+    exitSelectMode();
     ReFreshTheQQMap(page.value, 1);
   };
   window.updateActivityOptions = updateActivityOptionsFunction;

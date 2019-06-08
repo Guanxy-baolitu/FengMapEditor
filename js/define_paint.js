@@ -1,6 +1,3 @@
-/**
- * Created by 关某人 on 2019/5/12.
- */
 var currentColor = new qq.maps.Color(255, 127, 80, 0.3);
 var currentIcon = new qq.maps.MarkerImage("img/icons/icon0t.png");
 var constShadow = new qq.maps.MarkerImage("img/shadow.png");

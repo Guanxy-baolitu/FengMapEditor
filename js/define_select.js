@@ -28,7 +28,7 @@ var setSelectButtonsEnabled = function(enable){
   }
   else{
     $("#AddDetailPageBtn").addClass("disabled");
-    $("#DeleteBtn").addClass("disabledg");
+    $("#DeleteBtn").addClass("disabled");
     $("#assignActBtn").addClass("disabled");
   }
 }
@@ -45,7 +45,7 @@ var switchToSelectModeFunction = function () {
     mapCover.qqCover.clickable = true;
     mapCover.qqCover.editable = false;
     mapCover.qqCover.cursor = "hand";
-    var pushToList = function (currentMarkerList) {
+    var pushToList = function () {
       currentMarkerList.push(mapCover);
       mapCover.qqCover.clickable = false;
       if (mapCover.qqCover instanceof qq.maps.Marker) { mapCover.qqCover.setShadow(constShadow); }
@@ -53,62 +53,63 @@ var switchToSelectModeFunction = function () {
       mapCover.qqCover.cursor = "default";
       qq.maps.event.removeListener(mapCover.clickListener);
     };
-    mapCover.clickListener = qq.maps.event.addListener(mapCover.qqCover, 'click', function (event) { pushToList(currentMarkerList); 
+    mapCover.clickListener = qq.maps.event.addListener(mapCover.qqCover, 'click', function (event) { pushToList(); 
       setSelectButtonsEnabled(true); });
     mapCover.qqCover.strokeColor = mapCover.qqCover.fillColor;
   });
   ReFreshTheQQMap(currentPageName, currentFloor);
 };
 
+var activities = {};
+
 var updateActivityOptionsFunction = function () {
   var actSelectDom = document.getElementById("actSelect");
   actSelectDom.options.length = 0;
-  ///Mock
-  var activities = [];
-  function act(idx, name) {
-    this.actID = idx;
-    this.actName = name;
-  }
-  activities.push(new act(1, "表演"));
-  activities.push(new act(2, "抽奖"));
+  /// TODO: 查询现有活动，取活动ID与活动名称
+  activities[1] = "表演";
+  activities[2] = "抽奖";
   ///Mock
   if (activities.length === 0) return;
-  activities.forEach(function (act) {
-    actSelectDom.options.add(new Option(act.actName, act.actID));
+  var set = false;
+  Object.keys(activities).forEach(function (actId) {
+    actSelectDom.options.add(new Option(activities[actId], actId));
+    if(set===false){actSelectDom.value = actId; set=true;}
   });
-  actSelectDom.value = activities[0].actID;
 }
+
+var showBadge = function (event, name) {
+  switch(event.type){
+    case 'mouseover': {
+      $("#textBadge").show();
+      $("#textBadge").css("top", ""+event.cursorPixel.y+"px");
+      $("#textBadge").css("left", ""+event.cursorPixel.x+"px");
+      $("#textBadge").html(name);
+      break;
+    }case 'mousemove': {
+      $("#textBadge").css("top", ""+event.cursorPixel.y+"px");
+      $("#textBadge").css("left", ""+event.cursorPixel.x+"px");
+      break;
+    }
+    case 'mouseout': $("#textBadge").hide();break;
+    default: console.log(event); break;
+  }
+};
 
 var assignCurrentMarkersFunction = function () {
   if (currentMarkerList == false) return;
   var actID = parseInt(document.getElementById('actSelect').value);
-  exitSelectMode();
   currentMarkerList.forEach(function (mapCover) {
+    if(mapCover.qqCover instanceof qq.maps.Polyline) {alert("路线不能用于关联活动！");return;}
     mapCover.actId=actID;
+    mapCover.actName = activities[actID];
+    qq.maps.event.addListener(mapCover.qqCover, 'mouseover', function (event) { showBadge(event, mapCover.actName);});
+    qq.maps.event.addListener(mapCover.qqCover, 'mousemove', function (event) { showBadge(event, mapCover.actName);});
+    qq.maps.event.addListener(mapCover.qqCover, 'mouseout', function (event) { showBadge(event, mapCover.actName);});
   });
+  exitSelectMode();
 };
 var deleteCurrentMarkersFunction = function () {
   if (currentMarkerList == false) return;
-  exitSelectMode();
   currentMarkerList.forEach(function (delMarker) { delMarker.qqCover.setMap(null); });
+  exitSelectMode();
 };
-
-var selectMultiMarkersWithCallback = function (objList, callback) {
-  exitPaintMode();
-  if (GeojsonPages[currentPageName].floors[currentFloor].MapCovers == false) return;
-  GeojsonPages[currentPageName].floors[currentFloor].MapCovers.forEach(function (cover) {
-    cover.qqCover.clickable = true;
-    cover.cursor = "pointer";
-    var pushToList = function (event, objList) {
-      objList.push(cover); cover.qqCover.clickable = false; cover.qqCover.cursor = "move"; qq.maps.event.removeListener(cover.clickListener);
-      //if(event.shiftKey) {document.addEventListener("keyup", releaseShiftToFinish);console.log("shiftKey")}
-      //else if(typeof callback == "function") callback(objList);
-    }
-    cover.clickListener = qq.maps.event.addListener(cover.qqCover, 'click', function (event) { pushToList(event, objList); });
-  });
-  //var releaseShiftToFinish = function(e){
-  //  var event = e || window.event;var key = event.which || event.keyCode || event.charCode;// 兼容FF和IE和Opera
-  //  if (key == 16) {document.removeEventListener("keyup", releaseShiftToFinish);map.draggableCursor="move";console.log("ReleaseshiftKey");if(typeof callback == "function") callback(objList);}
-  //};
-};
-

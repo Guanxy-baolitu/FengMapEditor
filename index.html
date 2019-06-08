@@ -31,7 +31,7 @@
   <div class="row" style="width: 98%; padding-top: 8px; padding-left: 8px;">
     <div class="col-md-4">
       <form class="form-inline" role="form">
-        <input type='text' class="form-control" size="2" value='北京' id="regionText" />
+        <input type='text' class="form-control" size="2" placeholder='北京' id="regionText" />
         <div class="input-group">
           <input id="keyword" class="form-control" size="14" type="textbox" placeholder="请输入地点关键词">
           <span class="input-group-btn">
@@ -138,7 +138,7 @@
             </div><!-- /.modal-content -->
           </div><!-- /.modal -->
         </div>
-        <input id="AddDetailPageBtn" value="添加详情页" data-toggle="modal" data-target="#myModal2" class=" btn btn-primary disabled"type="button" />
+        <input id="AddDetailPageBtn" value="关联详情页" data-toggle="modal" data-target="#myModal2" class=" btn btn-primary disabled"type="button" />
         <input id="DeleteBtn" value="删除" onclick="deleteCurrentMarkers()" class=" btn btn-danger disabled" type="button" />
       </div>
     </div>
@@ -148,7 +148,7 @@
             onclick="previewDetailPage()" type="button" />
     </div>
   </div>
-  <div id="container"></div>
+  <div id="container"></div><span id="textBadge"class="badge"style='position:absolute; top:0px; left:0px; z-index: 1000;'></span>
   <div style='position:absolute; top:110px; left:60px; background:aliceblue' id="infoDiv">
     <button id="hideInfoDiv" type="button" class="btn btn-block btn-default">关闭</button></div>
   <script src="js/vendor/modernizr-3.7.1.min.js"></script>
