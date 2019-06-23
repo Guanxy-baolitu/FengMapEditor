@@ -97,6 +97,7 @@ var saveAllToGeoJSONFunction = function () {
     Object.keys(GeojsonPages[name].floors).forEach(function (idx) {
       GeojsonPages[name].floors[idx].MapCovers.forEach(function (mapCover) {
         var thisfeature;
+        if(mapCover.qqCover.map==null) return;
         if (mapCover.qqCover instanceof qq.maps.Circle) {
           var thisfeature = new FeatureObj("Point");
           thisfeature.geometry.coordinates.push(mapCover.qqCover.center.getLng());
@@ -110,7 +111,8 @@ var saveAllToGeoJSONFunction = function () {
           thisfeature.geometry.coordinates.push(mapCover.qqCover.position.getLng());
           thisfeature.geometry.coordinates.push(mapCover.qqCover.position.getLat());
           pageBounds.extend(mapCover.qqCover.position);
-          thisfeature.properties[strIcon] = mapCover.qqCover.icon;
+          console.log(mapCover.qqCover.icon);
+          thisfeature.properties[strIcon] = mapCover.qqCover.icon.url;
         }
         else if (mapCover.qqCover instanceof qq.maps.Polygon || mapCover.qqCover instanceof qq.maps.Polyline) {
           var latlngBounds;
@@ -140,13 +142,15 @@ var saveAllToGeoJSONFunction = function () {
         geoStorageObj.features.push(thisfeature);
       });
     });
-    geoStorageObj.bounds = [];
-    geoStorageObj.bounds.push(pageBounds.getNorthEast());
-    geoStorageObj.bounds.push(pageBounds.getSouthWest());
-    geoStorageObj.initialPnt = pageBounds.getCenter();
-    var fileName = name; // TODO: 区分默认地图与详情页
-    var new_json = JSON.stringify(geoStorageObj);
-    console.log(new_json);
+    if(geoStorageObj.features.length!=0){
+      geoStorageObj.bounds = [];
+      geoStorageObj.bounds.push(pageBounds.getNorthEast());
+      geoStorageObj.bounds.push(pageBounds.getSouthWest());
+      geoStorageObj.initialPnt = pageBounds.getCenter();
+      var fileName = name; // TODO: 区分默认地图与详情页
+      var new_json = JSON.stringify(geoStorageObj);
+      console.log(new_json);
+    }
   });
 };
 

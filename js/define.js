@@ -102,9 +102,9 @@ var ReFreshTheQQMap = function (pageName, floorIdx) {
         } else {
           GeojsonPages[name].floors[idx].MapCovers.forEach(function (mapCover) {
             mapCover.qqCover.setVisible(false);
-            clearListeners(mapCover.qqCover, 'mouseover');
-            clearListeners(mapCover.qqCover, 'mousemove');
-            clearListeners(mapCover.qqCover, 'mouseout');
+            qq.maps.event.clearListeners(mapCover.qqCover, 'mouseover');
+            qq.maps.event.clearListeners(mapCover.qqCover, 'mousemove');
+            qq.maps.event.clearListeners(mapCover.qqCover, 'mouseout');
           });
         }
       });
